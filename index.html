@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -89,6 +90,8 @@
             transition: background 0.2s ease;
         }
         .project-link:hover { background: var(--accent-hover); }
+        
+        .error-msg { text-align: center; padding: 40px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; border: 1px solid #ef4444; max-width: 500px; margin: 40px auto; }
     </style>
 </head>
 <body>
@@ -101,12 +104,16 @@
     </header>
 
     <main class="projects-grid" id="projects-container">
-        <!-- يتم جلب المشاريع ديناميكياً هنا -->
+        <!-- يتم جلب المشاريع هنا -->
     </main>
 
     <script>
-        fetch('data.json')
-            .then(res => res.json())
+        // مضاف إليه محدد وقت لتجنب كاش المتصفح القديم لجلب البيانات الحية فورا
+        fetch('data.json?v=' + new Date().getTime())
+            .then(res => {
+                if(!res.ok) throw new Error("ملف البيانات غير موجود");
+                return res.json();
+            })
             .then(data => {
                 document.getElementById('user-name').innerText = data.profile.name || 'مرحباً بك في معرضي';
                 document.getElementById('user-title').innerText = data.profile.title || '';
@@ -119,22 +126,31 @@
                 document.getElementById('user-links').innerHTML = linksHtml;
 
                 let projectsHtml = '';
-                data.projects.forEach(proj => {
-                    projectsHtml += `
-                        <div class="project-card">
-                            <img class="project-img" src="${proj.image || 'https://unsplash.com'}" alt="${proj.title}">
-                            <div class="project-info">
-                                <h3>${proj.title}</h3>
-                                <p>${proj.description}</p>
-                                ${proj.link ? `<a class="project-link" href="\${proj.link}" target="_blank">معاينة المشروع ←</a>` : ''}
+                if(!data.projects || data.projects.length === 0) {
+                    projectsHtml = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">لا توجد مشاريع مضافة حالياً. اذهب للوحة التحكم لإضافة أول مشروع!</div>';
+                } else {
+                    data.projects.forEach(proj => {
+                        projectsHtml += `
+                            <div class="project-card">
+                                <img class="project-img" src="${proj.image || 'https://unsplash.com'}" alt="${proj.title}">
+                                <div class="project-info">
+                                    <h3>${proj.title}</h3>
+                                    <p>${proj.description}</p>
+                                    ${proj.link ? `<a class="project-link" href="\${proj.link}" target="_blank">معاينة المشروع ←</a>` : ''}
+                                </div>
                             </div>
-                        </div>
-                    `;
-                });
+                        `;
+                    });
+                }
                 document.getElementById('projects-container').innerHTML = projectsHtml;
             })
             .catch(err => {
-                document.getElementById('user-name').innerText = "حدث خطأ أثناء تحميل البيانات";
+                document.getElementById('profile-header').innerHTML = `
+                    <div class="error-msg">
+                        <h3>حدث خطأ أثناء تحميل البيانات</h3>
+                        <p>تأكد من إنشاء ملف يحمل اسم <strong>data.json</strong> داخل المستودع وتعبئته بشكل صحيح.</p>
+                    </div>
+                `;
                 console.error(err);
             });
     </script>
