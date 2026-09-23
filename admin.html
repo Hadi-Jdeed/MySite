@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم — إدارة البورتفوليو</title>
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --panel: #1e2433;
+            --input-bg: #131824;
+            --text: #f1f5f9;
+            --text-sub: #94a3b8;
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --blue: #38bdf8;
+        }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg); 
+            margin: 0; 
+            padding: 30px 15px; 
+            color: var(--text);
+        }
+        .container { 
+            max-width: 760px; 
+            margin: 0 auto; 
+            background: var(--panel); 
+            padding: 35px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+        }
+        h1 { font-size: 2rem; margin-top: 0; color: var(--text); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        h2 { font-size: 1.25rem; color: var(--blue); margin: 30px 0 15px 0; display: flex; align-items: center; gap: 8px;}
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-size: 0.95rem; font-weight: 500; color: var(--text-sub); }
+        input, textarea { 
+            width: 100%; padding: 12px; 
+            background: var(--input-bg); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 8px; 
+            color: var(--text); 
+            box-sizing: border-box; 
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus { border-color: var(--blue); outline: none; }
+        textarea { height: 110px; resize: vertical; }
+        
+        button { 
+            background: var(--primary); color: #fff; border: none; 
+            padding: 12px 24px; border-radius: 8px; cursor: pointer; 
+            font-size: 1rem; font-weight: 600; transition: background 0.2s; 
+        }
+        button:hover { background: var(--primary-hover); }
+        .btn-blue { background: var(--blue); color: #0b0f19; }
+        .btn-blue:hover { background: #7dd3fc; }
+        .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; }
+        
+        .project-item { 
+            background: var(--input-bg); padding: 15px 20px; 
+            margin-bottom: 12px; border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center; 
+        }
+        .status { padding: 15px; margin-top: 20px; border-radius: 8px; display: none; font-weight: 600; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>لوحة إدارة المعرض (الوضع المريح)</h1>
+    
+    <h2>⚙️ إعدادات الربط الآمن (GitHub)</h2>
+    <div class="form-group">
+        <label>اسم المستخدم الشخصي في GitHub:</label>
+        <input type="text" id="gh-user" placeholder="مثال: alix-alix877">
+    </div>
+    <div class="form-group">
+        <label>اسم المستودع المستضيف (Repository):</label>
+        <input type="text" id="gh-repo" placeholder="مثال: pro">
+    </div>
+    <div class="form-group">
+        <label>رمز الوصول السري الجديد (GitHub Token):</label>
+        <input type="password" id="gh-token" placeholder="قم بلصق الرمز السري هنا لحفظه بمتصفحك فقط">
+    </div>
+
+    <h2>👤 بياناتك التعريفية</h2>
+    <div class="form-group">
+        <label>الاسم الكامل:</label>
+        <input type="text" id="p-name">
+    </div>
+    <div class="form-group">
+        <label>المسمى المهني المختصر:</label>
+        <input type="text" id="p-title" placeholder="مثال: مطور برمجيات / مهندس واجهات">
+    </div>
+    <div class="form-group">
+        <label>نبذة عن تخصصك وخبرتك (Bio):</label>
+        <textarea id="p-bio"></textarea>
+    </div>
+    <div class="form-group">
+        <label>رابط حساب GitHub الشخصي:</label>
+        <input type="text" id="p-github">
+    </div>
+    <div class="form-group">
+        <label>رابط حساب LinkedIn:</label>
+        <input type="text" id="p-linkedin">
+    </div>
+    <div class="form-group">
+        <label>البريد الإلكتروني للاتصال:</label>
+        <input type="email" id="p-email">
+    </div>
+
+    <h2>📁 إضافة مشروع جديد</h2>
+    <div class="form-group">
+        <label>اسم المشروع:</label>
+        <input type="text" id="proj-title">
+    </div>
+    <div class="form-group">
+        <label>شرح ووصف مبسط للمشروع:</label>
+        <textarea id="proj-desc"></textarea>
+    </div>
+    <div class="form-group">
+        <label>رابط صورة غلاف المشروع (اختياري):</label>
+        <input type="text" id="proj-img" placeholder="اتركه فارغاً ليتم وضع غلاف افتراضي أنيق">
+    </div>
+    <div class="form-group">
+        <label>رابط المعاينة الحية أو رابط الكود المصدري:</label>
+        <input type="text" id="proj-link" placeholder="https://...">
+    </div>
+    <button type="button" onclick="addProject()" class="btn-blue">إدراج المشروع في القائمة</button>
+
+    <h2>📋 مشاريعك الجاهزة حالياً</h2>
+    <div id="projects-list"></div>
+
+    <h2>🚀 نشر التحديثات الحية</h2>
+    <button type="button" onclick="publishToGithub()" style="width: 100%; padding: 16px; font-size: 1.1rem; margin-top: 10px;">نشر وتحديث موقعي الآن</button>
+    <div id="status-box" class="status"></div>
+</div>
+
+<script>
+    let siteData = { profile: { name: "", title: "", bio: "", github: "", linkedin: "", email: "" }, projects: [] };
+
+    window.onload = function() {
+        if(localStorage.getItem('gh_user')) document.getElementById('gh-user').value = localStorage.getItem('gh_user');
+        if(localStorage.getItem('gh_repo')) document.getElementById('gh-repo').value = localStorage.getItem('gh_repo');
+        if(localStorage.getItem('gh_token')) document.getElementById('gh-token').value = localStorage.getItem('gh_token');
+        
+        if(localStorage.getItem('portfolio_data')) {
+            siteData = JSON.parse(localStorage.getItem('portfolio_data'));
+            loadProfileFields();
+            renderProjectsList();
+        }
+    };
+
+    function loadProfileFields() {
+        document.getElementById('p-name').value = siteData.profile.name || "";
+        document.getElementById('p-title').value = siteData.profile.title || "";
+        document.getElementById('p-bio').value = siteData.profile.bio || "";
+        document.getElementById('p-github').value = siteData.profile.github || "";
+        document.getElementById('p-linkedin').value = siteData.profile.linkedin || "";
+        document.getElementById('p-email').value = siteData.profile.email || "";
+    }
+
+    function saveFieldsToLocal() {
+        siteData.profile.name = document.getElementById('p-name').value;
+        siteData.profile.title = document.getElementById('p-title').value;
+        siteData.profile.bio = document.getElementById('p-bio').value;
+        siteData.profile.github = document.getElementById('p-github').value;
+        siteData.profile.linkedin = document.getElementById('p-linkedin').value;
+        siteData.profile.email = document.getElementById('p-email').value;
+        
+        localStorage.setItem('portfolio_data', JSON.stringify(siteData));
+        localStorage.setItem('gh_user', document.getElementById('gh-user').value);
+        localStorage.setItem('gh_repo', document.getElementById('gh-repo').value);
+        localStorage.setItem('gh_token', document.getElementById('gh-token').value);
+    }
+
+    function addProject() {
+        const title = document.getElementById('proj-title').value;
+        const description = document.getElementById('proj-desc').value;
+        const image = document.getElementById('proj-img').value;
+        const link = document.getElementById('proj-link').value;
+
+        if(!title || !description) { alert('يرجى كتابة عنوان المشروع والوصف أولاً.'); return; }
+
+        siteData.projects.push({ title, description, image, link });
+        saveFieldsToLocal();
+        renderProjectsList();
+
+        document.getElementById('proj-title').value = '';
+        document.getElementById('proj-desc').value = '';
+        document.getElementById('proj-img').value = '';
+        document.getElementById('proj-link').value = '';
+    }
+
+    function deleteProject(index) {
+        if(confirm('هل تريد إزالة هذا المشروع من القائمة؟')) {
+            siteData.projects.splice(index, 1);
+            saveFieldsToLocal();
+            renderProjectsList();
+        }
+    }
+
+    function renderProjectsList() {
+        const listDiv = document.getElementById('projects-list');
+        if(siteData.projects.length === 0) { listDiv.innerHTML = '<p style="color:var(--text-sub);">لا توجد ملفات أو مشاريع مضافة في القائمة بعد.</p>'; return; }
+        
+        let html = '';
+        siteData.projects.forEach((proj, idx) => {
+            html += `
+                <div class="project-item">
+                    <div><strong>${proj.title}</strong></div>
+                    <button class="btn-danger" onclick="deleteProject(${idx})">حذف</button>
+                </div>
+            `;
+        });
+        listDiv.innerHTML = html;
+    }
+
+    async function publishToGithub() {
+        saveFieldsToLocal();
+        const user = document.getElementById('gh-user').value;
+        const repo = document.getElementById('gh-repo').value;
+        const token = document.getElementById('gh-token').value;
+        const statusBox = document.getElementById('status-box');
+
+        if(!user || !repo || !token) { alert('تأكد من إدخال كافة إعدادات اتصال جيت هب بالكامل.'); return; }
+
+        statusBox.style.display = 'block';
+        statusBox.style.background = '#d97706';
+        statusBox.style.color = '#fff';
+        statusBox.innerText = 'جاري ضغط وحزم ملف البيانات ورفعه إلى مستودع جيت هب...';
+
+        const filePath = 'data.json';
+const url = https://github.com{user}/${repo}/contents/${filePath};const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(siteData, null, 2))));let sha = null;try {let res = await fetch(url, { headers: { 'Authorization': token ${token} } });if (res.status === 200) {let fileInfo = await res.json();sha = fileInfo.sha;}} catch(e) {}try {let bodyData = { message: "تحديث مشاريع البورتفوليو عبر اللوحة المطور", content: contentBase64 };if(sha) bodyData.sha = sha;let response = await fetch(url, {method: 'PUT',headers: { 'Authorization': token ${token}, 'Content-Type': 'application/json' },body: JSON.stringify(bodyData)});if(response.status === 200 || response.status === 201) {statusBox.style.background = 'var(--primary)';statusBox.innerText = 'تم تحديث موقعك بنجاح وبأمان تام! انتظر دقيقة ليقوم السيرفر بتحديث العرض العام.';} else {let errData = await response.json();statusBox.style.background = '#ef4444';statusBox.innerText = خطأ في الاتصال: ${errData.message};}} catch(error) {statusBox.style.background = '#ef4444';statusBox.innerText = فشل الرفع: ${error};}}
