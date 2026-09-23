@@ -66,14 +66,45 @@
             border: 1px solid rgba(255,255,255,0.05);
             display: flex; justify-content: space-between; align-items: center; 
         }
-        .status { padding: 18px; margin-top: 20px; border-radius: 8px; display: none; font-weight: 600; text-align: center; font-size: 1.05rem; line-height: 1.5; }
+        
+        /* تصميم شريط النسبة المطور */
+        .progress-container {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            height: 24px;
+            overflow: hidden;
+            display: none;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #38bdf8, #10b981);
+            width: 0%;
+            height: 100%;
+            transition: width 0.4s ease;
+        }
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 0;
+            left: 0;
+            line-height: 24px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        
+        .status { padding: 18px; margin-top: 15px; border-radius: 8px; display: none; font-weight: 600; text-align: center; font-size: 1.05rem; line-height: 1.5; }
         .status a { color: #fff; text-decoration: underline; font-weight: bold; margin-right: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>لوحة إدارة المعرض (الوضع المريح)</h1>
+    <h1>لوحة إدارة المعرض (مؤشر التقدم المطور)</h1>
     
     <h2>⚙️ إعدادات الربط الآمن (GitHub)</h2>
     <div class="form-group">
@@ -140,7 +171,12 @@
     <h2>🚀 نشر التحديثات الحية</h2>
     <button type="button" onclick="publishToGithub()" style="width: 100%; padding: 16px; font-size: 1.1rem; margin-top: 10px;">نشر وتحديث موقعي الآن</button>
     
-    <!-- صندوق عرض الحالة المطور والمطلوب -->
+    <!-- عناصر مؤشر التحمّل والنسبة المئوية -->
+    <div class="progress-container" id="prog-container">
+        <div class="progress-bar" id="prog-bar"></div>
+        <div class="progress-text" id="prog-text">0%</div>
+    </div>
+    
     <div id="status-box" class="status"></div>
 </div>
 
@@ -206,31 +242,4 @@
 
         if(!title || !description) { alert('يرجى كتابة عنوان المشروع والوصف أولاً.'); return; }
 
-        siteData.projects.push({ title, description, image, link });
-        saveFieldsToLocal();
-        renderProjectsList();
-
-        document.getElementById('proj-title').value = '';
-        document.getElementById('proj-desc').value = '';
-        document.getElementById('proj-img').value = '';
-        document.getElementById('proj-link').value = '';
-    }
-
-    function deleteProject(index) {
-        if(confirm('هل تريد إزالة هذا المشروع من القائمة؟')) {
-            siteData.projects.splice(index, 1);
-            saveFieldsToLocal();
-            renderProjectsList();
-        }
-    }
-
-    function renderProjectsList() {
-        const listDiv = document.getElementById('projects-list');
-        if(!siteData.projects || siteData.projects.length === 0) { listDiv.innerHTML = '<p style="color:var(--text-sub);">لا توجد ملفات أو مشاريع مضافة في القائمة بعد.</p>'; return; }
-        
-        let html = '';
-        siteData.projects.forEach((proj, idx) => {
-            html += `
-                <div class="project-item">
-                    <div><strong>${proj.title}</strong></div>
-حذف`;});listDiv.innerHTML = html;}async function publishToGithub() {saveFieldsToLocal();const user = document.getElementById('gh-user').value;const repo = document.getElementById('gh-repo').value;const token = document.getElementById('gh-token').value;const statusBox = document.getElementById('status-box');if(!user || !repo || !token) { alert('تأكد من إدخال كافة إعدادات اتصال جيت هب بالكامل.'); return; }// تهيئة العرض لشريط الانتظارstatusBox.style.display = 'block';statusBox.style.background = '#d97706';statusBox.style.color = '#fff';statusBox.innerHTML = '⏳ جاري معالجة وحزم البيانات ورفعها عبر سيرفر جيت هب، يرجى الانتظار...';const filePath = 'data.json';const url = https://github.com{user}/${repo}/contents/${filePath};const contentBase64 = btoa(encodeURIComponent(JSON.stringify(siteData, null, 2)).replace(/%([0-9A-F]{2})/g, function(match, p1) {return String.fromCharCode('0x' + p1);}));let sha = null;try {let res = await fetch(url, { headers: { 'Authorization': token ${token} } });if (res.status === 200) {let fileInfo = await res.json();sha = fileInfo.sha;}} catch(e) {}try {let bodyData = { message: "تحديث مشاريع البورتفوليو عبر اللوحة", content: contentBase64 };if(sha) bodyData.sha = sha;let response = await fetch(url, {method: 'PUT',headers: { 'Authorization': token ${token}, 'Content-Type': 'application/json' },body: JSON.stringify(bodyData)});if(response.status === 200 || response.status === 201) {// تحديث الواجهة عند اكتمال المهمة بنجاح وعرض روابط التحديثstatusBox.style.background = 'var(--primary)';const liveUrl = https://${user}.github.io/${repo}/;statusBox.innerHTML = 🎉 <strong>تمت المهمة بنجاح واكتمل رفع التحديثات أونلاين!</strong><br> <span style="font-size:0.9rem; opacity:0.9;">(قد يستغرق سيرفر جيت هب دقيقة واحدة لعرض البيانات الجديدة)</span><br><br> 👉 <a href="${liveUrl}" target="_blank">اضغط هنا لفتح موقعك ومشاهدة التغييرات الحية</a>;} else {let errData = await response.json();statusBox.style.background = '#ef4444';statusBox.innerText = ❌ فشلت المهمة: ${errData.message};}} catch(error) {statusBox.style.background = '#ef4444';statusBox.innerText = ❌ حدث خطأ غير متوقع: ${error};}}
+siteData.projects.push({ title, description, image, link });saveFieldsToLocal();renderProjectsList();document.getElementById('proj-title').value = '';document.getElementById('proj-desc').value = '';document.getElementById('proj-img').value = '';document.getElementById('proj-link').value = '';}function deleteProject(index) {if(confirm('هل تريد إزالة هذا المشروع من القائمة؟')) {siteData.projects.splice(index, 1);saveFieldsToLocal();renderProjectsList();}}function renderProjectsList() {const listDiv = document.getElementById('projects-list');if(!siteData.projects || siteData.projects.length === 0) { listDiv.innerHTML = 'لا توجد ملفات أو مشاريع مضافة في القائمة بعد.'; return; }let html = '';siteData.projects.forEach((proj, idx) => {html += <div class="project-item"> <div><strong>${proj.title}</strong></div> <button class="btn-danger" onclick="deleteProject(${idx})">حذف</button> </div>;});listDiv.innerHTML = html;}// دالة تحديث شريط النسبة مئويةfunction updateProgress(percentage, text) {const pContainer = document.getElementById('prog-container');const pBar = document.getElementById('prog-bar');const pText = document.getElementById('prog-text');pContainer.style.display = 'block';pBar.style.width = percentage + '%';pText.innerText = text +  (${percentage}%);}async function publishToGithub() {saveFieldsToLocal();const user = document.getElementById('gh-user').value;const repo = document.getElementById('gh-repo').value;const token = document.getElementById('gh-token').value;const statusBox = document.getElementById('status-box');if(!user || !repo || !token) { alert('تأكد من إدخال كافة إعدادات اتصال جيت هب بالكامل.'); return; }statusBox.style.display = 'none';// 1. مرحلة الحزم والترميز (25%)updateProgress(25, 'جاري ضغط البيانات وترميز الملف...');const filePath = 'data.json';const url = https://github.com{user}/${repo}/contents/${filePath};const contentBase64 = btoa(encodeURIComponent(JSON.stringify(siteData, null, 2)).replace(/%([0-9A-F]{2})/g, function(match, p1) {return String.fromCharCode('0x' + p1);}));let sha = null;// 2. مرحلة فحص النسخ السابقة بالسيرفر (50%)await new Promise(r => setTimeout(r, 400)); // محاكاة بصرية رشيقةupdateProgress(50, 'جاري الاتصال بـ GitHub وفحص التزامن...');try {let res = await fetch(url, { headers: { 'Authorization': token ${token} } });if (res.status === 200) {let fileInfo = await res.json();sha = fileInfo.sha;}} catch(e) {}// 3. مرحلة الرفع الفعلي النهائي (75%)await new Promise(r => setTimeout(r, 400));updateProgress(75, 'جاري إرسال الملف وتحديث المستودع الحيوّي...');try {let bodyData = { message: "تحديث مشاريع البورتفوليو عبر اللوحة", content: contentBase64 };if(sha) bodyData.sha = sha;let response = await fetch(url, {method: 'PUT',headers: { 'Authorization': token ${token}, 'Content-Type': 'application/json' },body: JSON.stringify(bodyData)});// 4. اكتمال العملية (100%)if(response.status === 200 || response.status === 201) {updateProgress(100, 'اكتملت العملية بنجاح! 🚀');setTimeout(() => {document.getElementById('prog-container').style.display = 'none';statusBox.style.display = 'block';statusBox.style.background = 'var(--primary)';const liveUrl = https://${user}.github.io/${repo}/;statusBox.innerHTML = 🎉 <strong>تم الرفع بنظام 100% وتحديث موقعك بنجاح!</strong><br> 👉 <a href="${liveUrl}" target="_blank">اضغط هنا لفتح موقعك الحقيقي مباشرة</a>;}, 600);} else {let errData = await response.json();document.getElementById('prog-container').style.display = 'none';statusBox.style.display = 'block';statusBox.style.background = '#ef4444';statusBox.innerText = ❌ فشل الرفع: ${errData.message};}} catch(error) {document.getElementById('prog-container').style.display = 'none';statusBox.style.display = 'block';statusBox.style.background = '#ef4444';statusBox.innerText = ❌ حدث خطأ غير متوقع: ${error};}}
