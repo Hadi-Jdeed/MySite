@@ -66,7 +66,8 @@
             border: 1px solid rgba(255,255,255,0.05);
             display: flex; justify-content: space-between; align-items: center; 
         }
-        .status { padding: 15px; margin-top: 20px; border-radius: 8px; display: none; font-weight: 600; text-align: center; }
+        .status { padding: 18px; margin-top: 20px; border-radius: 8px; display: none; font-weight: 600; text-align: center; font-size: 1.05rem; line-height: 1.5; }
+        .status a { color: #fff; text-decoration: underline; font-weight: bold; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -138,6 +139,8 @@
 
     <h2>🚀 نشر التحديثات الحية</h2>
     <button type="button" onclick="publishToGithub()" style="width: 100%; padding: 16px; font-size: 1.1rem; margin-top: 10px;">نشر وتحديث موقعي الآن</button>
+    
+    <!-- صندوق عرض الحالة المطور والمطلوب -->
     <div id="status-box" class="status"></div>
 </div>
 
@@ -154,7 +157,6 @@
             loadProfileFields();
             renderProjectsList();
         } else {
-            // جلب مبدئي من السيرفر في حال وجود بيانات سابقة
             fetchDataFromServer();
         }
     };
@@ -231,11 +233,4 @@
             html += `
                 <div class="project-item">
                     <div><strong>${proj.title}</strong></div>
-                    <button class="btn-danger" onclick="deleteProject(${idx})">حذف</button>
-                </div>
-            `;
-        });
-        listDiv.innerHTML = html;
-    }
-
-async function publishToGithub() {saveFieldsToLocal();const user = document.getElementById('gh-user').value;const repo = document.getElementById('gh-repo').value;const token = document.getElementById('gh-token').value;const statusBox = document.getElementById('status-box');if(!user || !repo || !token) { alert('تأكد من إدخال كافة إعدادات اتصال جيت هب بالكامل.'); return; }statusBox.style.display = 'block';statusBox.style.background = '#d97706';statusBox.style.color = '#fff';statusBox.innerText = 'جاري ضغط وحزم ملف البيانات ورفعه إلى مستودع جيت هب...';const filePath = 'data.json';const url = https://github.com{user}/${repo}/contents/${filePath};// ترميز آمن يدعم النصوص العربية تماماً دون مشاكل لغوية بالرفعconst contentBase64 = btoa(encodeURIComponent(JSON.stringify(siteData, null, 2)).replace(/%([0-9A-F]{2})/g, function(match, p1) {return String.fromCharCode('0x' + p1);}));let sha = null;try {let res = await fetch(url, { headers: { 'Authorization': token ${token} } });if (res.status === 200) {let fileInfo = await res.json();sha = fileInfo.sha;}} catch(e) {}try {let bodyData = { message: "تحديث مشاريع البورتفوليو عبر اللوحة", content: contentBase64 };if(sha) bodyData.sha = sha;let response = await fetch(url, {method: 'PUT',headers: { 'Authorization': token ${token}, 'Content-Type': 'application/json' },body: JSON.stringify(bodyData)});if(response.status === 200 || response.status === 201) {statusBox.style.background = 'var(--primary)';statusBox.innerText = 'تم تحديث موقعك بنجاح وبأمان تام! انتظر دقيقة ليقوم السيرفر بتحديث العرض العام.';} else {let errData = await response.json();statusBox.style.background = '#ef4444';statusBox.innerText = خطأ في الاتصال: ${errData.message};}} catch(error) {statusBox.style.background = '#ef4444';statusBox.innerText = فشل الرفع: ${error};}}
+حذف`;});listDiv.innerHTML = html;}async function publishToGithub() {saveFieldsToLocal();const user = document.getElementById('gh-user').value;const repo = document.getElementById('gh-repo').value;const token = document.getElementById('gh-token').value;const statusBox = document.getElementById('status-box');if(!user || !repo || !token) { alert('تأكد من إدخال كافة إعدادات اتصال جيت هب بالكامل.'); return; }// تهيئة العرض لشريط الانتظارstatusBox.style.display = 'block';statusBox.style.background = '#d97706';statusBox.style.color = '#fff';statusBox.innerHTML = '⏳ جاري معالجة وحزم البيانات ورفعها عبر سيرفر جيت هب، يرجى الانتظار...';const filePath = 'data.json';const url = https://github.com{user}/${repo}/contents/${filePath};const contentBase64 = btoa(encodeURIComponent(JSON.stringify(siteData, null, 2)).replace(/%([0-9A-F]{2})/g, function(match, p1) {return String.fromCharCode('0x' + p1);}));let sha = null;try {let res = await fetch(url, { headers: { 'Authorization': token ${token} } });if (res.status === 200) {let fileInfo = await res.json();sha = fileInfo.sha;}} catch(e) {}try {let bodyData = { message: "تحديث مشاريع البورتفوليو عبر اللوحة", content: contentBase64 };if(sha) bodyData.sha = sha;let response = await fetch(url, {method: 'PUT',headers: { 'Authorization': token ${token}, 'Content-Type': 'application/json' },body: JSON.stringify(bodyData)});if(response.status === 200 || response.status === 201) {// تحديث الواجهة عند اكتمال المهمة بنجاح وعرض روابط التحديثstatusBox.style.background = 'var(--primary)';const liveUrl = https://${user}.github.io/${repo}/;statusBox.innerHTML = 🎉 <strong>تمت المهمة بنجاح واكتمل رفع التحديثات أونلاين!</strong><br> <span style="font-size:0.9rem; opacity:0.9;">(قد يستغرق سيرفر جيت هب دقيقة واحدة لعرض البيانات الجديدة)</span><br><br> 👉 <a href="${liveUrl}" target="_blank">اضغط هنا لفتح موقعك ومشاهدة التغييرات الحية</a>;} else {let errData = await response.json();statusBox.style.background = '#ef4444';statusBox.innerText = ❌ فشلت المهمة: ${errData.message};}} catch(error) {statusBox.style.background = '#ef4444';statusBox.innerText = ❌ حدث خطأ غير متوقع: ${error};}}
