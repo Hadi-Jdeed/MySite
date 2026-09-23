@@ -77,11 +77,11 @@
     <h2>⚙️ إعدادات الربط الآمن (GitHub)</h2>
     <div class="form-group">
         <label>اسم المستخدم الشخصي في GitHub:</label>
-        <input type="text" id="gh-user" placeholder="مثال: alix-alix877">
+        <input type="text" id="gh-user" placeholder="مثال: hadi-jdeed">
     </div>
     <div class="form-group">
         <label>اسم المستودع المستضيف (Repository):</label>
-        <input type="text" id="gh-repo" placeholder="مثال: pro">
+        <input type="text" id="gh-repo" placeholder="مثال: MySite">
     </div>
     <div class="form-group">
         <label>رمز الوصول السري الجديد (GitHub Token):</label>
@@ -153,8 +153,25 @@
             siteData = JSON.parse(localStorage.getItem('portfolio_data'));
             loadProfileFields();
             renderProjectsList();
+        } else {
+            // جلب مبدئي من السيرفر في حال وجود بيانات سابقة
+            fetchDataFromServer();
         }
     };
+
+    async function fetchDataFromServer() {
+        const user = document.getElementById('gh-user').value || 'hadi-jdeed';
+        const repo = document.getElementById('gh-repo').value || 'MySite';
+        try {
+            let res = await fetch(`https://githubusercontent.com{user}/${repo}/main/data.json?v=` + new Date().getTime());
+            if(res.ok) {
+                siteData = await res.json();
+                loadProfileFields();
+                renderProjectsList();
+                localStorage.setItem('portfolio_data', JSON.stringify(siteData));
+            }
+        }catch(e){}
+    }
 
     function loadProfileFields() {
         document.getElementById('p-name').value = siteData.profile.name || "";
@@ -207,7 +224,7 @@
 
     function renderProjectsList() {
         const listDiv = document.getElementById('projects-list');
-        if(siteData.projects.length === 0) { listDiv.innerHTML = '<p style="color:var(--text-sub);">لا توجد ملفات أو مشاريع مضافة في القائمة بعد.</p>'; return; }
+        if(!siteData.projects || siteData.projects.length === 0) { listDiv.innerHTML = '<p style="color:var(--text-sub);">لا توجد ملفات أو مشاريع مضافة في القائمة بعد.</p>'; return; }
         
         let html = '';
         siteData.projects.forEach((proj, idx) => {
@@ -221,19 +238,4 @@
         listDiv.innerHTML = html;
     }
 
-    async function publishToGithub() {
-        saveFieldsToLocal();
-        const user = document.getElementById('gh-user').value;
-        const repo = document.getElementById('gh-repo').value;
-        const token = document.getElementById('gh-token').value;
-        const statusBox = document.getElementById('status-box');
-
-        if(!user || !repo || !token) { alert('تأكد من إدخال كافة إعدادات اتصال جيت هب بالكامل.'); return; }
-
-        statusBox.style.display = 'block';
-        statusBox.style.background = '#d97706';
-        statusBox.style.color = '#fff';
-        statusBox.innerText = 'جاري ضغط وحزم ملف البيانات ورفعه إلى مستودع جيت هب...';
-
-        const filePath = 'data.json';
-const url = https://github.com{user}/${repo}/contents/${filePath};const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(siteData, null, 2))));let sha = null;try {let res = await fetch(url, { headers: { 'Authorization': token ${token} } });if (res.status === 200) {let fileInfo = await res.json();sha = fileInfo.sha;}} catch(e) {}try {let bodyData = { message: "تحديث مشاريع البورتفوليو عبر اللوحة المطور", content: contentBase64 };if(sha) bodyData.sha = sha;let response = await fetch(url, {method: 'PUT',headers: { 'Authorization': token ${token}, 'Content-Type': 'application/json' },body: JSON.stringify(bodyData)});if(response.status === 200 || response.status === 201) {statusBox.style.background = 'var(--primary)';statusBox.innerText = 'تم تحديث موقعك بنجاح وبأمان تام! انتظر دقيقة ليقوم السيرفر بتحديث العرض العام.';} else {let errData = await response.json();statusBox.style.background = '#ef4444';statusBox.innerText = خطأ في الاتصال: ${errData.message};}} catch(error) {statusBox.style.background = '#ef4444';statusBox.innerText = فشل الرفع: ${error};}}
+async function publishToGithub() {saveFieldsToLocal();const user = document.getElementById('gh-user').value;const repo = document.getElementById('gh-repo').value;const token = document.getElementById('gh-token').value;const statusBox = document.getElementById('status-box');if(!user || !repo || !token) { alert('تأكد من إدخال كافة إعدادات اتصال جيت هب بالكامل.'); return; }statusBox.style.display = 'block';statusBox.style.background = '#d97706';statusBox.style.color = '#fff';statusBox.innerText = 'جاري ضغط وحزم ملف البيانات ورفعه إلى مستودع جيت هب...';const filePath = 'data.json';const url = https://github.com{user}/${repo}/contents/${filePath};// ترميز آمن يدعم النصوص العربية تماماً دون مشاكل لغوية بالرفعconst contentBase64 = btoa(encodeURIComponent(JSON.stringify(siteData, null, 2)).replace(/%([0-9A-F]{2})/g, function(match, p1) {return String.fromCharCode('0x' + p1);}));let sha = null;try {let res = await fetch(url, { headers: { 'Authorization': token ${token} } });if (res.status === 200) {let fileInfo = await res.json();sha = fileInfo.sha;}} catch(e) {}try {let bodyData = { message: "تحديث مشاريع البورتفوليو عبر اللوحة", content: contentBase64 };if(sha) bodyData.sha = sha;let response = await fetch(url, {method: 'PUT',headers: { 'Authorization': token ${token}, 'Content-Type': 'application/json' },body: JSON.stringify(bodyData)});if(response.status === 200 || response.status === 201) {statusBox.style.background = 'var(--primary)';statusBox.innerText = 'تم تحديث موقعك بنجاح وبأمان تام! انتظر دقيقة ليقوم السيرفر بتحديث العرض العام.';} else {let errData = await response.json();statusBox.style.background = '#ef4444';statusBox.innerText = خطأ في الاتصال: ${errData.message};}} catch(error) {statusBox.style.background = '#ef4444';statusBox.innerText = فشل الرفع: ${error};}}
